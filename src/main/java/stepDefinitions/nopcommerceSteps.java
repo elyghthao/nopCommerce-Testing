@@ -1,30 +1,38 @@
 package stepDefinitions;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
-import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.*;
+import org.openqa.selenium.io.FileHandler;
+import org.testng.Assert;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.Select;
 
+
+import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 
 public class nopcommerceSteps {
     WebDriver driver;
-
-
+    ExtentReports extent = new ExtentReports();
+    ExtentSparkReporter reporter = new ExtentSparkReporter("src/main/generatedReports/LoginFeatureReport.html");
+    ExtentTest loginTest = extent.createTest("Login");
+    ExtentTest buyJewelryTest = extent.createTest("Buy Jewelry Test");
+//    FileUtils
 
     @Given("the user is on the nopCommerce login page")
     public void the_user_is_on_the_nop_commerce_login_page() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--guest");
-//        options.addArguments("--headless=new");
+        options.addArguments("--headless=new");
         driver = new ChromeDriver(options);
-
         driver.get("https://demo.nopcommerce.com");
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.findElement(By.xpath("//a[@class='ico-login']")).click();
@@ -42,9 +50,21 @@ public class nopcommerceSteps {
     }
 
     @Then("the user should be redirected to the My Account page")
-    public void the_user_should_be_redirected_to_the_my_account_page() {
-        boolean status = driver.findElement(By.xpath("//a[@class='ico-account']")).isDisplayed();
-        Assert.assertTrue(status);
+    public void the_user_should_be_redirected_to_the_my_account_page() throws IOException {
+        System.out.println("in before try");
+        try{
+            boolean status = driver.findElement(By.xpath("//a[@class='ico-account']")).isDisplayed();
+            Assert.assertTrue(status);
+        }catch (Exception e){
+            File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+            File tgt = new File("src/main/generatedReports/screenshots" + System.currentTimeMillis() + ".png");
+            FileHandler.copy(src,tgt);
+
+            extent.attachReporter(reporter);
+            loginTest.fail("Failed", MediaEntityBuilder.createScreenCaptureFromPath(tgt.getAbsolutePath()).build());
+            extent.flush();
+        }
+
     }
 
     @Then("the user should see a welcome message")
@@ -64,8 +84,8 @@ public class nopcommerceSteps {
         boolean loginDisplayed = driver.findElement(By.xpath("//a[contains(.,'Log in')]")).isDisplayed();
         Assert.assertTrue(loginDisplayed);
     }
-
-    //jewlery rental feature
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //jewelry rental feature
     @Given("the user has selected which jewelery to rent")
     public void the_user_has_selected_which_jewelery_to_rent() {
         ChromeOptions options = new ChromeOptions();
@@ -90,13 +110,14 @@ public class nopcommerceSteps {
 
         driver.findElement(By.xpath("//button[@id='add-to-cart-button-40']")).click();//click on rent button
 
+
     }
     @When("the user clicks on the rent button")
     public void the_user_clicks_on_the_rent_button() {
         driver.findElement(By.xpath("//button[@id='add-to-cart-button-40']")).click();//click on rent button
     }
     @Then("the user should navigate to the shopping cart")
-    public void the_user_should_navigate_to_the_shopping_cart() {
+    public void the_user_should_navigate_to_the_shopping_cart() throws InterruptedException {
         driver.findElement(By.xpath("//a[@class='ico-cart']")).click();// click on shopping cart button top right
     }
     @Then("click checkouts as a guest")
@@ -106,7 +127,7 @@ public class nopcommerceSteps {
         driver.findElement(By.xpath("//button[contains(.,'Checkout')]")).click();//click checkout as guest
     }
     @Then("complete the checkout by entering in all of the data")
-    public void complete_the_checkout_by_entering_in_all_of_the_data() throws InterruptedException {
+    public void complete_the_checkout_by_entering_in_all_of_the_data() throws InterruptedException, IOException {
         WebElement inputs = driver.findElement(By.xpath("//div[@class='edit-address']"));
         inputs.findElement(By.xpath("./*[1]/input")).sendKeys("Elygh"); //first name
         inputs.findElement(By.xpath("./*[2]/input")).sendKeys("Thao");//last name
@@ -139,6 +160,19 @@ public class nopcommerceSteps {
         String orderNum = driver.findElement(By.xpath("//*[@id=\"main\"]/div/div/div/div[2]/div/div[2]/div[1]/strong")).getText();
         driver.findElement(By.xpath("//*[@id=\"main\"]/div/div/div/div[2]/div/div[3]/button")).click();//click continue number
         System.out.println(orderNum);
+
+
+        File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        File tgt = new File("src/main/generatedReports/screenshots" + System.currentTimeMillis() + ".png");
+        FileHandler.copy(src,tgt);
+
+        extent.attachReporter(reporter);
+        buyJewelryTest.pass("details", MediaEntityBuilder.createScreenCaptureFromPath(tgt.getAbsolutePath()).build());
+        extent.flush();
+        System.out.println("IN HERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
     }
+
+
+
 
 }

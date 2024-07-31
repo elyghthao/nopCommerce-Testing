@@ -1,4 +1,4 @@
-# nopCommerce-Testing (Selenium, Cucumber BDD, ExtentReports, TestNG)
+# nopCommerce-Testing (Java, Selenium, Cucumber BDD, ExtentReports, TestNG)
 This project focuses on using Java and Selenium with the Cucumber and TestNG framework. Testing is done on the nopCommerce open source website focusing on UI automation and overall functionality of the website demonstrating effective use of Behavior Driven Development (BDD).
 
 * Features of the website are identified early and a test plan is created after analysis.
